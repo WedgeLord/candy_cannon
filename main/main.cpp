@@ -1,5 +1,6 @@
 //#include "../components/hall_sensor_tachometer.h"
 #include "../components/motor_controller.h"
+#include "../components/potentiometer.h"
 
 #include "freertos/FreeRTOS.h"
 
@@ -18,6 +19,7 @@ extern "C" void app_main(void)
         vTaskDelay(500 / portTICK_PERIOD_MS);
     /**/
     }
+    /*
     brushed_motor_controller motor;
     motor.update_target_rpm(180);
     vTaskDelay(20'000 / portTICK_PERIOD_MS);
@@ -26,4 +28,14 @@ extern "C" void app_main(void)
     vTaskDelay(100'000 / portTICK_PERIOD_MS);
     motor.update_target_rpm(0);
     vTaskDelay(3'000 / portTICK_PERIOD_MS);
+    */
+    QueueHandle_t q = xQueueCreate(1, sizeof(double));
+    potentiometer pot([q](double voltage) -> bool { xQueueOverwriteFromISR(q, &voltage, NULL); return false; });
+    while (true)
+    {
+        double v = 0.0;
+        xQueueReceive(q, &v, portMAX_DELAY);
+        printf("voltage: %lf\n", v);
+    }
+    //pot.~potentiometer();
 }
