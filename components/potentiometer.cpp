@@ -43,7 +43,7 @@ potentiometer::potentiometer(pot_callback cb)
         .on_conv_done = [](adc_continuous_handle_t, const adc_continuous_evt_data_t *data, void *ctx) -> bool { 
             adc_callback_params *params = (adc_callback_params *)ctx;
             if (params == NULL) return false;
-            params->func(data_to_level(params->adc, data));
+            data_to_level(params->adc, data)(params->func);
             return false; 
         },
         .on_pool_ovf = NULL,
@@ -79,8 +79,9 @@ potentiometer::~potentiometer()
     adc_continuous_deinit(adc_reader);
 }
 
-double potentiometer::data_to_level(const adc_continuous_handle_t adc, const adc_continuous_evt_data_t *data)
+std::function<void(pot_callback)> potentiometer::data_to_level(const adc_continuous_handle_t adc, const adc_continuous_evt_data_t *data)
 {
+    static volatile double last_level = 0.0;
     uint32_t count = 0;
     adc_continuous_data_t level[1];
     if (adc != NULL)
@@ -88,8 +89,16 @@ double potentiometer::data_to_level(const adc_continuous_handle_t adc, const adc
         adc_continuous_parse_data(adc, data->conv_frame_buffer, sizeof(level[0]), level, &count);
         if (count > 0 && level->valid)
         {
-            return (level->raw_data / pow(2, 12)) * 5;
+            double new_level = level->raw_data / pow(2, 12);
+            double diff = last_level - new_level;
+            if (diff > 0.01 || diff < -0.01)
+            {
+                last_level = new_level;
+                return [new_level](pot_callback callback) -> void {
+                    callback(new_level);
+                };
+            }
         }
     }
-    return -1.0;
+    return [](pot_callback){};
 }

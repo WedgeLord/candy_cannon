@@ -24,6 +24,11 @@ void approach_rpm(void * task_args)
     while (true)
     {
         rpm_adjustment += (-0.0 + target_rpm - rpm) * 0.05;
+        // clamping range of changes to rpm
+        if (rpm_adjustment < -20)
+        {
+            rpm_adjustment = -20;
+        }
         printf("waiting: %d == %lu\n", time++, rpm);
         printf("target: %lu + %f -> %lu\n", target_rpm, rpm_adjustment, convert_percent_to_duty((target_rpm + rpm_adjustment) / 200.0));
         ESP_ERROR_CHECK(

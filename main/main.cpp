@@ -17,25 +17,25 @@ extern "C" void app_main(void)
         gettimeofday(&current_measured_time, NULL);
         printf("waiting: %d == %llu.%lu\n", time++, current_measured_time.tv_sec, current_measured_time.tv_usec);
         vTaskDelay(500 / portTICK_PERIOD_MS);
-    /**/
     }
-    /*
     brushed_motor_controller motor;
-    motor.update_target_rpm(180);
-    vTaskDelay(20'000 / portTICK_PERIOD_MS);
-    motor.update_target_rpm(75);
+    /**/
+    potentiometer motor_control([&motor](double level) -> void {
+        motor.update_target_rpm(level * 200);
+    });
+    //motor.update_target_rpm(180);
+    //vTaskDelay(20'000 / portTICK_PERIOD_MS);
+    //motor.update_target_rpm(75);
     vTaskDelay(portMAX_DELAY);
-    vTaskDelay(100'000 / portTICK_PERIOD_MS);
-    motor.update_target_rpm(0);
-    vTaskDelay(3'000 / portTICK_PERIOD_MS);
-    */
+    /*
     QueueHandle_t q = xQueueCreate(1, sizeof(double));
-    potentiometer pot([q](double voltage) -> bool { xQueueOverwriteFromISR(q, &voltage, NULL); return false; });
+    potentiometer pot([q](double level) -> void { xQueueOverwriteFromISR(q, &level, NULL); return false; });
     while (true)
     {
         double v = 0.0;
         xQueueReceive(q, &v, portMAX_DELAY);
-        printf("voltage: %lf\n", v);
+        printf("level: %lf\n", v);
     }
     //pot.~potentiometer();
+    */
 }

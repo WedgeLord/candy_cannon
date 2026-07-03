@@ -13,5 +13,5 @@ public:
     ~potentiometer();
 
 private:
-    static double data_to_level(const adc_continuous_handle_t, const adc_continuous_evt_data_t *);
+    static std::function<void(pot_callback)> data_to_level(const adc_continuous_handle_t, const adc_continuous_evt_data_t *);
 };

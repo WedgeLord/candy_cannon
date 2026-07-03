@@ -73,7 +73,7 @@ void hall_sensor_tachometer::update()
     struct timeval last_measured_time = { 0, 0 };
     while (true)
     {
-        for (int p : rolling_buffer) { printf("%d | ", p); }; puts("");
+        //for (int p : rolling_buffer) { printf("%d | ", p); }; puts("");
 
         struct timeval current_measured_time;
         if (xQueueReceive(latest_measured_time_handle, &current_measured_time, portMAX_DELAY) != pdTRUE)
